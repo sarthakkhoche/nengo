@@ -46,6 +46,8 @@ Release history
   as are commonly used to match biological spiking statistics. (`#1609`_)
 - Added the ``PositiveNeuronType`` test argument to run tests on all neuron types
   for which ``negative`` is not ``True``. (`#1609`_)
+- Added ``LinearSystem``, a ``Process`` to implement arbitrary linear systems.
+  (`#1611`_)
 
 **Changed**
 
@@ -93,6 +95,7 @@ Release history
   `#1607 <https://github.com/nengo/nengo/pull/1607>`__)
 
 .. _#1609: https://github.com/nengo/nengo/pull/1609
+.. _#1611: https://github.com/nengo/nengo/pull/1611
 .. _#1628: https://github.com/nengo/nengo/pull/1628
 
 3.0.0 (November 18, 2019)
