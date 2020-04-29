@@ -65,6 +65,10 @@ Release history
   as discrete synapses. (`#1611`_)
 - Added ``rng`` argument to ``Process.make_state``, for processes that use randomness
   in their initialization. (`#1611`_)
+- ``Connection`` now has the ``initial_value`` parameter, which allows the connection
+  synapses to be initialized to represent the desired value. This is useful for
+  minimizing startup transients in models with long synapses (e.g. recurrent networks).
+  (`#1611`_)
 
 **Changed**
 
