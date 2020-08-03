@@ -37,6 +37,7 @@ def check_tb_entries(entries, name_statement_pairs):
 
 
 def test_validation_error(request):
+    """Tests validation error is raised properly"""
     # Ensure settings are set back to default after the test, even if it fails
     request.addfinalizer(
         lambda: rc.set(
@@ -83,6 +84,7 @@ def test_validation_error(request):
 
 
 def test_readonly_error():
+    """Tests readonly error is raised properly"""
     with nengo.Network():
         ens = nengo.Ensemble(n_neurons=10, dimensions=1)
         p = nengo.Probe(ens)
@@ -111,6 +113,7 @@ def test_readonly_error():
 
 
 def test_build_error():
+    """Tests build error is raised properly"""
     model = nengo.builder.Model()
     with pytest.raises(BuildError) as excinfo:
         nengo.builder.Builder.build(model, "")
@@ -130,6 +133,8 @@ def test_build_error():
 
 
 def test_obsolete_error():
+    """Tests obsolete error is raised properly"""
+
     class Test:
         ab = ObsoleteParam("ab", "msg")
 
@@ -152,6 +157,8 @@ def test_obsolete_error():
 
 
 def test_moved_error():
+    """Tests moved error is raised properly"""
+
     with pytest.raises(MovedError) as excinfo:
         generate_graphviz()
 
@@ -166,6 +173,8 @@ def test_moved_error():
 
 
 def test_config_error():
+    """Tests config error is raised properly"""
+
     with pytest.raises(ConfigError) as excinfo:
         print(nengo.Network().config[object])
 
@@ -183,6 +192,8 @@ def test_config_error():
 
 
 def test_spa_module_error():
+    """Tests spa module error is raised properly"""
+
     with pytest.raises(SpaModuleError) as excinfo:
         with nengo.spa.SPA():
             nengo.spa.State(1, label="1")
@@ -200,6 +211,8 @@ def test_spa_module_error():
 
 
 def test_spa_parse_error():
+    """Tests spa parse error is raised properly"""
+
     vocab = nengo.spa.Vocabulary(16)
     with pytest.raises(SpaParseError) as excinfo:
         print(vocab["a"])
@@ -219,6 +232,8 @@ def test_spa_parse_error():
 
 
 def test_simulator_closed():
+    """Tests simulator closed is raised properly"""
+
     with nengo.Network() as net:
         nengo.Ensemble(10, 1)
     with nengo.Simulator(net) as sim:
@@ -242,6 +257,8 @@ def test_simulator_closed():
 
 
 def test_simulation_error():
+    """Tests simulation error is raised properly"""
+
     with nengo.Network() as net:
         nengo.Node(lambda t: None if t > 0.002 else 1.0)
     with nengo.Simulator(net) as sim:
@@ -262,6 +279,8 @@ def test_simulation_error():
 
 
 def test_signal_error():
+    """Tests signal error is raised properly"""
+
     s = nengo.builder.signal.Signal([1])
     with pytest.raises(SignalError) as excinfo:
         s.initial_value = 0
@@ -280,6 +299,8 @@ def test_signal_error():
 
 
 def test_fingerprint_error():
+    """Tests fingerprint error is raised properly"""
+
     with pytest.raises(FingerprintError) as excinfo:
         nengo.cache.Fingerprint(lambda x: x)
 
@@ -294,6 +315,8 @@ def test_fingerprint_error():
 
 
 def test_network_context_error(request):
+    """Tests network context error is raised properly"""
+
     request.addfinalizer(nengo.Network.context.clear)
 
     with pytest.raises(NetworkContextError) as excinfo:
@@ -315,6 +338,8 @@ def test_network_context_error(request):
 
 
 def test_unconvertible():
+    """Tests unconvertible is raised properly"""
+
     with nengo.Network() as net:
         n = nengo.Node(output=None, size_in=1)
         nengo.Connection(n, n, synapse=None)
@@ -337,6 +362,7 @@ def test_unconvertible():
 
 
 def test_cache_io_error():
+    """Tests cache io error is raised properly"""
     bio = BytesIO(b"a" * 40)
     with pytest.raises(CacheIOError) as excinfo:
         nengo.utils.nco.read(bio)
