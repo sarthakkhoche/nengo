@@ -8,6 +8,7 @@ from nengo.utils.testing import ThreadedAssertion
 
 
 def test_basic_context():
+    """Creates two networks and compares them to ensure context is working"""
     # We must give the two Networks different labels because object comparison
     # is done using identifiers that stem from the top-level Network label.
     model1 = nengo.Network(label="test1")
@@ -35,6 +36,7 @@ def test_basic_context():
 
 
 def test_nested_context():
+    """Uses nested networks to test that context still funcitons"""
     model = nengo.Network()
     with model:
         con1 = nengo.Network()
@@ -67,6 +69,8 @@ def test_nested_context():
 
 
 def test_context_errors():
+    """Test that runtime errors are properly raised"""
+
     def add_something():
         nengo.Ensemble(1, dimensions=1)
 
@@ -106,6 +110,7 @@ def test_context_is_threadsafe():
 
 
 def test_get_objects():
+    """Tests getting objects from various levels of networks"""
     model = nengo.Network()
     with model:
         ens1 = nengo.Ensemble(10, 1)
@@ -152,6 +157,7 @@ def test_get_objects():
 
 
 def test_raises_exception_on_incompatiple_type_arguments():
+    """Tests that value errors are raised with invalid parameters"""
     with pytest.raises(ValueError):
         nengo.Network(label=1)
     with pytest.raises(ValueError):
@@ -159,6 +165,7 @@ def test_raises_exception_on_incompatiple_type_arguments():
 
 
 def test_n_neurons():
+    """Tests that n_neruons returns the total number of neurons in the network"""
     with nengo.Network() as net:
         nengo.Ensemble(10, 1)
         assert net.n_neurons == 10
@@ -169,6 +176,8 @@ def test_n_neurons():
 
 
 def test_readonly_attributes():
+    """Tests all readonly attributes raise errors when attempting to set them"""
+
     def test_attr(net, attr):
         with pytest.raises(
             ReadonlyError, match="Network.%s: %s is read-only" % (attr, attr)

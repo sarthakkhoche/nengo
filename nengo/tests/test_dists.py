@@ -42,6 +42,7 @@ def test_pdf(rng, allclose):
 
 @pytest.mark.parametrize("low,high", [(-2, -1), (-1, 1), (1, 2), (1, -1)])
 def test_uniform(low, high, rng, allclose):
+    """Tests uniform distributions"""
     n = 200
     dist = Uniform(low, high)
     samples = dist.sample(n, rng=rng)
@@ -57,6 +58,7 @@ def test_uniform(low, high, rng, allclose):
 
 @pytest.mark.parametrize("mean,std", [(0, 1), (0, 0), (10, 2)])
 def test_gaussian(mean, std, rng):
+    """Tests Gaussian distributions"""
     n = 500
     if std <= 0:
         with pytest.raises(ValueError):
@@ -72,6 +74,7 @@ def test_gaussian(mean, std, rng):
     "scale,shift,high", [(1.0, 0.0, np.inf), (10.0, 0.0, 1.0), (0.1, 0.3, 1.0)]
 )
 def test_exponential(scale, shift, high, rng):
+    """Tests exponential distributions"""
     n = 100
     dist = Exponential(scale, shift=shift, high=high)
     samples = dist.sample(n, rng=rng)
@@ -106,6 +109,7 @@ def test_hypersphere_surface(dimensions, rng, allclose):
 
 
 def test_hypersphere_dimension_fail():
+    """Ensures that creating a hypersphere with incorrect parameters raises a value error"""
     with pytest.raises(ValueError):
         UniformHypersphere(0).sample(1, 0)
 
@@ -117,6 +121,7 @@ def test_hypersphere_warns():
 
 @pytest.mark.parametrize("weights", [None, [5, 1, 2, 9], [3, 2, 1, 0]])
 def test_choice(weights, rng, allclose):
+    """Tests the choice function with weights"""
     n = 1000
     choices = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
     N = len(choices)
@@ -155,6 +160,7 @@ def test_samples_list(samples, allclose):
 
 
 def test_samples_errors(rng):
+    """Ensures a validation error is raised with invalid parameters"""
     samples = rng.random_sample(size=(12, 2))
     with pytest.raises(ValidationError):
         Samples(samples).sample(11, 2)

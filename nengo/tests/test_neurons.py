@@ -342,6 +342,7 @@ def test_sigmoid_response_curves(Simulator, max_rate, intercept, allclose):
 
 
 def test_tanh_invalid():
+    """Ensures validation error is thrown when given a large max rate"""
     tanh = Tanh(tau_ref=0.5)
     with pytest.raises(ValidationError, match="Max rates must be below"):
         tanh.gain_bias(max_rates=np.array([100]), intercepts=np.array([0]))
