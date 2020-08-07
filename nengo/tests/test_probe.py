@@ -171,6 +171,8 @@ def test_conn_output(Simulator, allclose):
 
 
 def test_slice(Simulator, allclose):
+    """Tests slices of probes are as expected by
+    comparing slices of probes with sliced targets"""
     with nengo.Network() as model:
         a = nengo.Node(output=lambda t: [np.cos(t), np.sin(t)])
         b = nengo.Ensemble(100, 2)
@@ -191,6 +193,7 @@ def test_slice(Simulator, allclose):
 
 
 def test_solver_defaults():
+    """Tests many methods of making default solvers"""
     solver1 = nengo.solvers.LstsqL2(reg=0.764)
     solver2 = nengo.solvers.LstsqL2(reg=0.911)
     solver3 = nengo.solvers.LstsqL2(reg=0.898)

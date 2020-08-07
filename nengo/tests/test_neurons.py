@@ -597,6 +597,7 @@ def test_direct_mode_nonfinite_value(Simulator):
 
 @pytest.mark.parametrize("generic", (True, False))
 def test_gain_bias(rng, NonDirectNeuronType, generic, allclose):
+    """Tests recieving gain and bias, and that the values are correct"""
     if NonDirectNeuronType == Sigmoid and generic:
         # the generic method doesn't work with sigmoid neurons (because they're
         # always positive). that's not a failure, because the sigmoid neurons

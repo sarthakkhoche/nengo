@@ -179,6 +179,8 @@ def test_stringparam():
 
 
 def test_enumparam():
+    """Tests Enum Params work as expected"""
+
     class Test:
         ep = params.EnumParam("ep", default="a", values=("a", "b", "c"))
 
@@ -197,6 +199,8 @@ def test_enumparam():
 
 
 def test_tupleparam():
+    """Tests Tuple Params work as expected"""
+
     class Test:
         tp = params.TupleParam("tp", default=(0, 0, 0), optional=True)
         tp3 = params.TupleParam("tp3", default=(0, 0, 0), length=3)
@@ -216,6 +220,8 @@ def test_tupleparam():
 
 
 def test_shapeparam():
+    """Tests shape params work as expected"""
+
     class Test:
         sp2 = params.ShapeParam("sp2", default=(0, 0), length=2, low=None)
         sp3 = params.ShapeParam("sp3", default=(0, 0, 0), length=3, optional=True)
@@ -324,6 +330,8 @@ def test_functionparam():
 
 
 def test_iter_params_does_not_list_obsolete_params():
+    """Ensures obsolete params are not listed as iter params"""
+
     class Test:
         p1 = params.IntParam("p1")
         p2 = params.IntParam("p2")
@@ -334,6 +342,7 @@ def test_iter_params_does_not_list_obsolete_params():
 
 @pytest.mark.filterwarnings("ignore:'Node.size_out' is being overwritten")
 def test_configure_all_nengo_parameters():
+    """Tests configuring a variety of nengo params"""
 
     # make up a non-default value for the parameter
     conv_func = {
@@ -388,6 +397,9 @@ def test_configure_all_nengo_parameters():
 
 
 def test_frozenobject_reprs():
+    """Tests that parameters are only shown in repr if their values are different
+    than the default, for both parameter defaults and argument defaults"""
+
     class TestFO(params.FrozenObject):
         a = params.NumberParam("a", default=3, readonly=True)
         b = params.NumberParam("b")
@@ -397,14 +409,14 @@ def test_frozenobject_reprs():
             self.a = a
             self.b = b
 
-    # test that parameters are only shown in repr if their values are different
-    # than the default, for both parameter defaults and argument defaults
     assert repr(TestFO(3)) == "TestFO()"
     assert repr(TestFO(2)) == "TestFO(a=2)"
     assert repr(TestFO(2, b=3)) == "TestFO(a=2, b=3)"
 
 
 def test_frozenobject_missing_arg_repr():
+    """Tests repr on frozen objects without argreprs"""
+
     class TestFO(params.FrozenObject):
         a = params.NumberParam("a", default=3, readonly=True)
 

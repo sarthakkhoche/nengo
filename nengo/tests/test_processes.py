@@ -215,7 +215,7 @@ def test_whitesignal_high_dt(Simulator, high, dt, seed, plt, allclose):
 
 @pytest.mark.parametrize("high,dt", [(501, 0.001), (500, 0.002)])
 def test_whitesignal_nyquist(Simulator, dt, high, seed):
-    # check that high cannot exceed nyquist frequency
+    """Check that high cannot exceed nyquist frequency"""
     process = WhiteSignal(1.0, high=high)
     with nengo.Network() as model:
         nengo.Node(process, size_out=1)
@@ -249,6 +249,7 @@ def test_whitesignal_continuity(Simulator, seed, plt):
 
 
 def test_sampling_shape():
+    """Tests white signal sampling shape is as expected"""
     process = WhiteSignal(0.1, high=500)
     assert process.run_steps(1).shape == (1, 1)
     assert process.run_steps(5, d=1).shape == (5, 1)
@@ -297,6 +298,8 @@ def test_frozen():
 
 
 def test_seed(Simulator, seed, allclose):
+    """Tests seed using a variety of whitesignals with seed values
+    and ensuring the ones with the same seed are the same"""
     with nengo.Network() as model:
         a = nengo.Node(WhiteSignal(0.1, high=100, seed=seed))
         b = nengo.Node(WhiteSignal(0.1, high=100, seed=seed + 1))
@@ -347,6 +350,8 @@ def test_present_input(Simulator, rng, allclose):
 
 class TestPiecewise:
     def run_sim(self, data, interpolation, Simulator):
+        """Runs a simulator with a piecewise function
+        and returns trange and data of a probe"""
         process = Piecewise(data, interpolation=interpolation)
 
         with nengo.Network() as model:
@@ -359,6 +364,7 @@ class TestPiecewise:
         return sim.trange(), sim.data[up]
 
     def test_basic(self, Simulator, allclose):
+        """Tests a basic piecewise functions as expected"""
         t, f = self.run_sim({0.05: 1, 0.1: 0}, "zero", Simulator)
         assert allclose(f[t == 0.001], [0.0])
         assert allclose(f[t == 0.025], [0.0])
@@ -369,6 +375,7 @@ class TestPiecewise:
         assert allclose(f[t == 0.15], [0.0])
 
     def test_lists(self, Simulator, allclose):
+        """Tests a piecewise using lists in the data"""
         t, f = self.run_sim({0.05: [1, 0], 0.1: [0, 1]}, "zero", Simulator)
         assert allclose(f[t == 0.001], [0.0, 0.0])
         assert allclose(f[t == 0.025], [0.0, 0.0])
@@ -391,11 +398,15 @@ class TestPiecewise:
         assert allclose(f(0), [0.0])
 
     def test_invalid_key(self):
+        """Ensures a validation error is raised when data contains
+        an invalid key"""
         data = {0.05: 1, 0.1: 0, "a": 0.2}
         with pytest.raises(ValidationError):
             Piecewise(data)
 
     def test_invalid_length(self):
+        """Ensures a validation error is raised when data contains
+        a list of invalid length"""
         data = {0.05: [1, 0], 0.1: [1, 0, 0]}
         with pytest.raises(ValidationError):
             Piecewise(data)
@@ -405,6 +416,8 @@ class TestPiecewise:
         Piecewise({0.05: [1], 0.1: 0})
 
     def test_invalid_interpolation_type(self):
+        """Ensures a validation error is raised when given
+        an invalid interpolation type"""
         data = {0.05: 1, 0.1: 0}
         with pytest.raises(ValidationError):
             Piecewise(data, interpolation="not-interpolation")
