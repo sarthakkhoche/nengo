@@ -1215,10 +1215,18 @@ def test_learning_transform_shape_error(Simulator):
             pass
 
 
-@pytest.mark.parametrize("synapse", [nengo.Lowpass(0.05), nengo.Alpha(0.03)])
-def test_initial_value(synapse, Simulator, seed, plt, allclose):
-    initial_values = [
+@pytest.mark.parametrize(
+    "Synapse",
+    [
+        lambda output: nengo.Lowpass(0.05, initial_output=output),
+        lambda output: nengo.Alpha(0.03, initial_output=output),
+        lambda output: nengo.synapses.Triangle(0.15, initial_output=output),
+    ],
+)
+def test_synapse_initial_output(Synapse, Simulator, seed, plt, allclose):
+    initial_outputs = [
         None,
+        1.0,
         nengo.dists.Choice([1.0]),
         [1, -1],
     ]
@@ -1230,14 +1238,13 @@ def test_initial_value(synapse, Simulator, seed, plt, allclose):
         a = nengo.Ensemble(200, dims, radius=1.5)
         nengo.Connection(u, a, synapse=None)
 
-        def add_output(initial_value=None):
+        def add_output(initial_output=None):
             v = nengo.Node(size_in=dims)
+            synapse = Synapse(initial_output)
             conn = nengo.Connection(a, v, synapse=synapse)
-            if initial_value is not None:
-                conn.initial_value = initial_value
             return nengo.Probe(v)
 
-        probes = [add_output(v) for v in initial_values]
+        probes = [add_output(v) for v in initial_outputs]
 
     with Simulator(net) as sim:
         sim.run(0.3)
@@ -1245,10 +1252,12 @@ def test_initial_value(synapse, Simulator, seed, plt, allclose):
     initial_sampled = [
         np.zeros(dims)
         if v is None
+        else v * np.ones(dims)
+        if isinstance(v, float)
         else v.sample(dims)
         if hasattr(v, "sample")
         else np.asarray(v)
-        for v in initial_values
+        for v in initial_outputs
     ]
     for v, probe in zip(initial_sampled, probes):
         plt.plot(sim.trange(), sim.data[probe], label="%s" % (list(v),))
@@ -1257,8 +1266,9 @@ def test_initial_value(synapse, Simulator, seed, plt, allclose):
     for x0, probe in zip(initial_sampled, probes):
         x = sim.data[probe]
 
-        # check that initial values are close to requested initial values
-        assert allclose(x[0], x0, atol=1e-5, record_rmse=False)
+        # check that initial values are roughly close to requested initial values
+        # (they will have already progressed one timestep, so they're not perfect)
+        assert allclose(x[1], x0, atol=1e-1, record_rmse=False)
 
         # check that any values that start close to their final value stay close
         close_dims = np.isclose(x0, u.output)
@@ -1276,7 +1286,7 @@ def test_initial_value(synapse, Simulator, seed, plt, allclose):
             )
 
 
-def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
+def test_neuron_initial_outputs(Simulator, seed, rng, plt, allclose):
     def encoder_gain_bias(n_neurons, dims, neuron_type, rng):
         encoders = UniformHypersphere(surface=True).sample(n_neurons, dims, rng=rng)
         max_rates = Uniform(150, 250).sample(n_neurons, rng=rng)
@@ -1284,7 +1294,7 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
         gain, bias = neuron_type.gain_bias(max_rates, intercepts)
         return (encoders, gain, bias)
 
-    synapse = nengo.Alpha(0.03)
+    Synapse = lambda initial_output: nengo.Alpha(0.03, initial_output=initial_output)
     neuron_type0 = nengo.LIF()
     neuron_type1 = nengo.LIFRate()
     Solver = nengo.solvers.LstsqL2
@@ -1303,8 +1313,8 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
 
     neurons0 = neuron_type0.rates(x0[None, :].dot(encoders0.T), gain0, bias0)
     assert neurons0.shape == (1, n_neurons0)
-    initial_value_a = neurons0.dot(decoders).dot(encoders1.T)[0]
-    initial_value_b = gain1 * initial_value_a  # weight solver weights include gains
+    initial_output_a = neurons0.dot(decoders).dot(encoders1.T)[0]
+    initial_output_b = gain1 * initial_output_a  # weight solver weights include gains
 
     with nengo.Network(seed=seed) as net:
         u = nengo.Node(x0)
@@ -1319,7 +1329,7 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
         )
         nengo.Connection(u, ens0, synapse=None)
 
-        def make_output(initial_value=None, weights=None):
+        def make_output(initial_output=None, weights=None):
             ens1 = nengo.Ensemble(
                 n_neurons1,
                 dims,
@@ -1329,9 +1339,7 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
                 gain=gain1,
                 bias=bias1,
             )
-            kwargs = dict(synapse=synapse)
-            if initial_value is not None:
-                kwargs["initial_value"] = initial_value
+            kwargs = dict(synapse=Synapse(initial_output))
 
             if weights is not None:
                 kwargs["transform"] = weights
@@ -1343,8 +1351,8 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
             return nengo.Probe(ens1)
 
         r_p = make_output(weights=weights)
-        a_p = make_output(weights=weights, initial_value=initial_value_a)
-        b_p = make_output(initial_value=initial_value_b)
+        a_p = make_output(weights=weights, initial_output=initial_output_a)
+        b_p = make_output(initial_output=initial_output_b)
 
     with Simulator(net) as sim:
         sim.run(0.3)
@@ -1354,25 +1362,8 @@ def test_neuron_initial_values(Simulator, seed, rng, plt, allclose):
     plt.plot(sim.trange(), sim.data[b_p], label="b")
     plt.legend()
 
-    assert not np.allclose(sim.data[r_p], x0, atol=2e-1, rtol=0)
+    assert not np.allclose(sim.data[r_p], x0, atol=0.2, rtol=0)
     for probe in (a_p, b_p):
-        assert allclose(sim.data[probe], x0, atol=2e-1, rtol=0, record_rmse=False)
+        assert allclose(sim.data[probe][1:], x0, atol=0.3, rtol=0, record_rmse=False)
 
-    assert allclose(sim.data[a_p], sim.data[b_p], atol=1e-2, rtol=0, record_rmse=False)
-
-
-def test_bad_initial_values():
-    with nengo.Network():
-        node2 = nengo.Node(size_in=2)
-        ens3 = nengo.Ensemble(2, 3)
-
-        nengo.Connection(node2, node2, initial_value=[1, 2])
-        nengo.Connection(ens3, node2, function=lambda x: [1, 1], initial_value=[1, 2])
-
-        with pytest.raises(ValidationError, match="initial_value"):
-            nengo.Connection(node2, node2, initial_value=[1])
-
-        with pytest.raises(ValidationError, match="initial_value"):
-            nengo.Connection(
-                ens3, node2, function=lambda x: [1, 1], initial_value=[1, 2, 3]
-            )
+    assert allclose(sim.data[a_p], sim.data[b_p], atol=0.02, rtol=0, record_rmse=False)
