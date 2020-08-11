@@ -124,7 +124,7 @@ class SimProcess(Operator):
 
 
 @Builder.register(Process)
-def build_process(model, process, sig_in=None, sig_out=None, mode="set"):
+def build_process(model, process, sig_in=None, sig_out=None, mode="set", seed_or_rng=0):
     """Builds a `.Process` object into a model.
 
     Parameters
@@ -157,7 +157,10 @@ def build_process(model, process, sig_in=None, sig_out=None, mode="set"):
         if sig_in is not None
         else rc.float_dtype
     )
-    state_init = process.make_state(shape_in, shape_out, model.dt, dtype=dtype)
+    state_rng = process.get_rng(seed_or_rng, offset=1)  # offset matches `Process.apply`
+    state_init = process.make_state(
+        shape_in, shape_out, model.dt, rng=state_rng, dtype=dtype
+    )
     state = {}
     for name, value in state_init.items():
         state[name] = Signal(value)

@@ -63,6 +63,8 @@ Release history
   recurrent synapse. For ``Lowpass`` synapses, this is equivalent to Principle 3 of the
   Neural Engineering Framework (NEF), but it generalizes to other synapse types, as well
   as discrete synapses. (`#1611`_)
+- Added ``rng`` argument to ``Process.make_state``, for processes that use randomness
+  in their initialization. (`#1611`_)
 
 **Changed**
 
