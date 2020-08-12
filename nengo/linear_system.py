@@ -24,6 +24,10 @@ def _as2d(M, last=True, dtype=np.float64):
         return M
 
 
+def _zeros_if_empty(M, shape, dtype=np.float64):
+    return np.zeros(shape, dtype=dtype) if M is None or M.size == 0 else M
+
+
 class LinearSystem(Process):
     """General linear time-invariant (LTI) system.
 
@@ -88,7 +92,6 @@ class LinearSystem(Process):
         self._tf = None
         self._zpk = None
 
-        dtype = LinearSystem.A.dtype
         if len(sys) == 2:
             A, B, C, D = tf2ss(*sys)
         elif len(sys) == 3:
@@ -103,7 +106,10 @@ class LinearSystem(Process):
                 obj=self,
             )
 
-        A, B, C, D = [_as2d(M, last=False) for M in (A, B, C, D)]
+        A = _as2d(A, last=False, dtype=LinearSystem.A.dtype)
+        B = _as2d(B, last=False, dtype=LinearSystem.B.dtype)
+        C = _as2d(C, last=True, dtype=LinearSystem.C.dtype)
+        D = _as2d(D, last=True, dtype=LinearSystem.D.dtype)
         self._input_size = self._find_size([B, D], index=1)
         self._output_size = self._find_size([C, D], index=0)
         state_size = self._find_size([A, B], index=0)
@@ -111,10 +117,10 @@ class LinearSystem(Process):
         Bshape = (state_size, self.input_size)
         Cshape = (self.output_size, state_size)
         Dshape = (self.output_size, self.input_size)
-        self.A = np.zeros(Ashape, dtype=dtype) if A is None or A.size == 0 else A
-        self.B = np.zeros(Bshape, dtype=dtype) if B is None or B.size == 0 else B
-        self.C = np.zeros(Cshape, dtype=dtype) if C is None or C.size == 0 else C
-        self.D = np.zeros(Dshape, dtype=dtype) if D is None or D.size == 0 else D
+        self.A = _zeros_if_empty(A, Ashape, dtype=LinearSystem.A.dtype)
+        self.B = _zeros_if_empty(B, Bshape, dtype=LinearSystem.B.dtype)
+        self.C = _zeros_if_empty(C, Cshape, dtype=LinearSystem.C.dtype)
+        self.D = _zeros_if_empty(D, Dshape, dtype=LinearSystem.D.dtype)
         self.x0 = x0
 
         super().__init__(

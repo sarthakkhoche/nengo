@@ -788,6 +788,14 @@ class TestLinearSystem:
             assert allclose(yab0, yab0_ref, rtol=1e-2, atol=5e-4)
             assert allclose(yab1, yab1_ref, rtol=1e-2, atol=5e-4)
 
+    def test_ss_shape(self):
+        A = np.eye(3)
+        B = [1, 2, 3]
+        C = [1, 2, 3]
+        D = None
+        ss = LinearSystem((A, B, C, D))
+        assert ss.B.shape == (3, 1) and ss.C.shape == (1, 3)
+
     def test_validation_errors(self):
         with pytest.raises(ValidationError, match="Must be a tuple in"):
             LinearSystem((0, 0, 0, 0, 0))
