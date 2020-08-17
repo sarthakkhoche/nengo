@@ -312,7 +312,6 @@ class LinearFilter(LinearSystem, Synapse):
         state = super().make_state(
             shape_in + (1,), shape_out + (1,), dt, rng, dtype=dtype
         )
-        X = state["X"]
 
         initial_output = self._sample_initial_output(shape_out, y0=y0, rng=rng)
         if initial_output is not None:

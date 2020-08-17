@@ -1241,7 +1241,7 @@ def test_synapse_initial_output(Synapse, Simulator, seed, plt, allclose):
         def add_output(initial_output=None):
             v = nengo.Node(size_in=dims)
             synapse = Synapse(initial_output)
-            conn = nengo.Connection(a, v, synapse=synapse)
+            nengo.Connection(a, v, synapse=synapse)
             return nengo.Probe(v)
 
         probes = [add_output(v) for v in initial_outputs]
