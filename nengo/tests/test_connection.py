@@ -1266,9 +1266,8 @@ def test_synapse_initial_output(Synapse, Simulator, seed, plt, allclose):
     for x0, probe in zip(initial_sampled, probes):
         x = sim.data[probe]
 
-        # check that initial values are roughly close to requested initial values
-        # (they will have already progressed one timestep, so they're not perfect)
-        assert allclose(x[1], x0, atol=1e-1, record_rmse=False)
+        # check that initial values are close to requested initial values
+        assert allclose(x[0], x0, atol=1e-1, record_rmse=False)
 
         # check that any values that start close to their final value stay close
         close_dims = np.isclose(x0, u.output)

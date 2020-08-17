@@ -124,6 +124,16 @@ class Synapse(Process):
         dt = self.default_dt if dt is None else dt
         filtered = np.array(x, copy=copy, dtype=rc.float_dtype)
         filt_view = np.rollaxis(filtered, axis=axis)  # rolled view on filtered
+        if y0 is not None:
+            if self.initial_output is not None:
+                warnings.warn("Setting `y0` overrides the existing `initial_output`")
+            else:
+                warnings.warn(
+                    DeprecationWarning(
+                        "`y0` is deprecated. Use `initial_output` on the synapse "
+                        "instance instead."
+                    )
+                )
 
         shape_in = shape_out = as_shape(filt_view[0].shape, min_dim=1)
         state_rng = self.get_rng(rng, offset=1)
@@ -155,21 +165,7 @@ class Synapse(Process):
         if self.initial_output is None and y0 is None:
             return None
 
-        output = self.initial_output
-        attr = "initial_output"
-        if y0 is not None:
-            output = y0
-            attr = "y0"
-            if self.initial_output is not None:
-                warnings.warn("Setting `y0` overrides the existing `initial_output`")
-            else:
-                warnings.warn(
-                    DeprecationWarning(
-                        "`y0` is deprecated. Use `initial_output` on the synapse "
-                        "instance instead."
-                    )
-                )
-
+        output = self.initial_output if y0 is None else y0
         if isinstance(output, Distribution):
             output = output.sample(n=np.prod(shape), d=1).reshape(shape)
         else:
@@ -182,7 +178,7 @@ class Synapse(Process):
             raise ValidationError(
                 "Output shape %s is not broadcastable to filter shape %s%s"
                 % (output.shape, shape, details),
-                attr,
+                "initial_output",
                 obj=self,
             )
 
@@ -307,13 +303,12 @@ class LinearFilter(LinearSystem, Synapse):
 
     def make_state(self, shape_in, shape_out, dt, rng, dtype=None, y0=None):
         assert shape_in == shape_out
+        initial_output = self._sample_initial_output(shape_out, y0=y0, rng=rng)
 
         # call LinearSystem's `make_state`
         state = super().make_state(
             shape_in + (1,), shape_out + (1,), dt, rng, dtype=dtype
         )
-
-        initial_output = self._sample_initial_output(shape_out, y0=y0, rng=rng)
         if initial_output is not None:
             self.update_state_from_output(state, initial_output, dt=dt)
 
