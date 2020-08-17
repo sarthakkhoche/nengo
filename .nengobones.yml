@@ -18,6 +18,7 @@ manifest_in:
     - nengo *.md
     - nengo *.rst
     - nengo *.txt
+    - nengo *.npz
 
 setup_py:
   package_data:
