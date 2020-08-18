@@ -223,10 +223,10 @@ class EnsembleArray(nengo.Network):
 
         .. testcode::
 
-           ea.add_output('output', None, solver=nengo.solvers.Lstsq())
+           ea.add_output("lstsq_output", None, solver=nengo.solvers.Lstsq())
 
-        creates a new output with the decoders of each connection solved for
-        with the `.Lstsq` solver.
+        creates a new output at ``ea.lstsq_output`` with the decoders
+        of each connection solved for with the `.Lstsq` solver.
 
         Parameters
         ----------
