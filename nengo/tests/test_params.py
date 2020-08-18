@@ -356,10 +356,6 @@ def test_configure_all_nengo_parameters():
             (nengo.connection.ConnectionFunctionParam, lambda attr: lambda x: x + 1),
             (nengo.connection.ConnectionTransformParam, lambda attr: 2.0),
             (
-                nengo.connection.ConnectionInitialValueParam,
-                lambda attr: nengo.dists.Choice([0.5]),
-            ),
-            (
                 nengo.learning_rules.LearningRuleTypeParam,
                 (lambda attr: nengo.learning_rules.PES()),
             ),
