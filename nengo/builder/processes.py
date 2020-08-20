@@ -144,6 +144,8 @@ def build_process(
         The output signal, or None if no output signal.
     mode : "set" or "inc" or "update", optional
         The ``mode`` of the built `.SimProcess`.
+    seed_or_rng : int or `numpy.random.RandomState`
+        The parent seed or random number generator to use if the seed is not set.
 
     Notes
     -----
@@ -202,6 +204,8 @@ def build_synapse(model, synapse, sig_in=None, sig_out=None, mode="set", seed_or
         The output signal, or None if no output signal.
     mode : "set" or "inc" or "update", optional
         The ``mode`` of the built `.SimProcess`.
+    seed_or_rng : int or `numpy.random.RandomState`
+        The parent seed or random number generator to use if the seed is not set.
 
     Notes
     -----
