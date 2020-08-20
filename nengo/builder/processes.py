@@ -2,8 +2,8 @@ import numpy as np
 
 from nengo.builder import Builder, Operator, Signal
 from nengo.processes import Process
-from nengo.synapses import Synapse
 from nengo.rc import rc
+from nengo.synapses import Synapse
 
 
 class SimProcess(Operator):
