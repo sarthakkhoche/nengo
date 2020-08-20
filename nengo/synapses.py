@@ -275,7 +275,7 @@ class LinearFilter(LinearSystem, Synapse):
                 obj=self,
             )
 
-        self._CombineClass = LinearFilter
+        self._factory = LinearFilter
 
     def evaluate(self, frequencies):
         """Evaluate the transfer function at the given frequencies.
