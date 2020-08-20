@@ -86,7 +86,7 @@ class LinearSystem(Process):
         return 0
 
     def __init__(self, sys, analog=True, method="zoh", x0=0, default_dt=0.001):
-        self._CombineClass = LinearSystem
+        self._factory = LinearSystem
 
         self._init_sys = sys  # for `argreprs`
         self._tf = None
@@ -208,7 +208,7 @@ class LinearSystem(Process):
 
     def combine(self, other):
         """Combine in series with another LinearSystem."""
-        cls = self._CombineClass
+        cls = self._factory
         if not isinstance(other, cls):
             raise ValidationError(
                 "Can only combine with other %s" % cls.__name__, attr="other", obj=self,
@@ -288,7 +288,7 @@ class LinearSystem(Process):
         Note that if the system is ``not analog``, a copy of the system is returned.
         This function cannot change the ``dt`` of an already discrete system.
         """
-        return self._CombineClass(
+        return self._factory(
             self.discrete_ss(dt),
             analog=False,
             method=self.method,
