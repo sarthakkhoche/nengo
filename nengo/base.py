@@ -325,8 +325,10 @@ class Process(FrozenObject):
 
         Parameters
         ----------
-        rng : int or `numpy.random.RandomState`
+        seed_or_rng : int or `numpy.random.RandomState`
             The parent seed or random number generator to use if the seed is not set.
+        offset : int, optional
+            Offset to add to the chosen seed for the random number generator.
         """
         seed = self.seed
         if seed is None:
